@@ -6,6 +6,7 @@ from tkinter import filedialog, messagebox
 from PIL import Image
 import time 
 
+
 class Executor_Rule():
     def __check_criteria(self, file, criteria):
         if criteria["name"] == "all" or file.name in criteria["name"]:
@@ -188,9 +189,9 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
         elif self.json_new_rule["action"] == "Copy" and self.json_new_rule["where_to_copy"] == None:
             messagebox.showerror("Error", "You must select a destination for your files")
         else:
-            self.save_the_rule()
+            self.func_create_top_level_and_ask_for_confirmation_to_save_the_rule()
             
-    def save_the_rule(self):
+    def func_create_top_level_and_ask_for_confirmation_to_save_the_rule(self):
         top_level_window = ctk.CTkToplevel()
         top_level_window.geometry("1000x500")
         
@@ -212,14 +213,27 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
                                                         font = ("Consolas", 22),
                                                         fg_color= "green",
                                                         hover_color= "darkgreen",
-                                                        command= self.new_rule_set_up) 
+                                                        command= self.func_finally_save_the_rule) 
         top_level_window_button_save.place(x = 425, y = 450)
         
         top_level_window.focus_set()
         
-    def new_rule_set_up(self):
-        pass #TODO 
-    
+    def func_finally_save_the_rule(self):
+        #save the rule to the json file 
+        
+        with open("rules_for_files_and_folders.json", "r") as file:
+            data_json = json.load(file)
+            
+        new_rule = {}
+        new_rule[self.entry_box_give_nikname.get() if self.entry_box_give_nikname.get() != "" else time.strftime("%Y-%m-%d %H:%M:%S")] = self.json_new_rule
+        
+        data_json.update(new_rule)
+        
+        with open("rules_for_files_and_folders.json", "w") as file:
+            json.dump(data_json, file, indent= 4)
+        self.reset_vars_and_widgets()
+        #TODO #self.display_rules() this should be updated so it doesn't cause a visual bug + test class Rules to see if it works properly
+       
     def display_rules(self):
         try:
             with open("rules_for_files_and_folders.json", "r") as file:
@@ -305,12 +319,12 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
         self.label_show_text_criteria.place(x = 310, y = 320)
         
         self.option_menu_criteria = ctk.CTkOptionMenu(master = self,
-                                                      values = ["Name", "Type", "Size"],
+                                                      values = ["No criteria", "Name", "Type", "Size"],
                                                       command= self.func_criteria,
                                                       font= ("Consolas", 22),
                                                         width= 150)
         self.option_menu_criteria.place(x = 310, y = 350)
-        self.option_menu_criteria.set("Name")
+        self.option_menu_criteria.set("No criteria")
         
         self.label_show_crierias_selected = ctk.CTkLabel(master = self,
                                                         text = f"Criterias selected:\nKey-word(s): {self.cash_criteria_name if self.cash_criteria_name != [] else None}\nType: {self.cash_criteria_type if self.cash_criteria_type != [] else None}\nSize: {self.cash_criteria_size if self.cash_criteria_size != {} else None}",
@@ -325,12 +339,12 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
         self.label_show_text_exception.place(x = 310, y = 550)
         
         self.option_menu_exception = ctk.CTkOptionMenu(master = self,
-                                                      values = ["Name", "Type", "Size"],
+                                                      values = ["No exceptions", "Name", "Type", "Size"],
                                                       command= self.func_exception,
                                                       font= ("Consolas", 22),
                                                         width= 150)
         self.option_menu_exception.place(x = 310, y = 585)
-        self.option_menu_exception.set("Name")
+        self.option_menu_exception.set("No exceptions")
         
     def func_exception(self, choice):
         try:
@@ -518,7 +532,17 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
         self.json_new_rule["action"] = choice
         
         if choice == "Delete":
-            pass
+            try:
+                self.label_show_where_the_file_will_be_moved.destroy()
+                self.button_where_to_move.destroy()
+            except:
+                pass
+            try:
+                self.button_where_to_copy.destroy()
+                self.label_show_where_the_file_will_be_copied.destroy()
+            except:
+                pass
+
         elif choice == "Move":
             self.button_where_to_move = ctk.CTkButton(master = self,
                                                         text = "Where?",
