@@ -86,8 +86,8 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
             self.start()
             
     def start(self):
-        Executor.start(Executor)
         if Executor.running == False:
+            Executor.start(Executor)
             self.after(30000, self.start)
     
     def display_panda(self):
@@ -116,18 +116,29 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
         with open("rules_for_files_and_folders.json", "r") as file:
             data_json = json.load(file)
             
-        if self.json_new_rule["action"] == None:
+        if self.json_new_rule["action"] == "None":
             messagebox.showerror("Error", "You must select an action for your rule")
-        elif self.json_new_rule["action"] == "Move" and self.json_new_rule["where_to_move"] == None:
+        elif self.json_new_rule["action"] == "Move" and self.json_new_rule["where_to_move"] == "None":
             messagebox.showerror("Error", "You must select a destination for your files")
-        elif self.json_new_rule["action"] == "Copy" and self.json_new_rule["where_to_copy"] == None:
+        elif self.json_new_rule["action"] == "Copy" and self.json_new_rule["where_to_copy"] == "None":
             messagebox.showerror("Error", "You must select a destination for your files")
         elif self.entry_box_give_nikname.get() in data_json.keys():
             messagebox.showerror("Error", "You already have a rule with that name\n\nPlease select another name for your rule")
         else:
             self.func_create_top_level_and_ask_for_confirmation_to_save_the_rule()
             
+    def update_dict_with_rule_in_creation(self):
+        self.json_new_rule["criteria"]["name"] = self.cash_criteria_name
+        self.json_new_rule["criteria"]["type"] = self.cash_criteria_type
+        self.json_new_rule["criteria"]["size"] = self.cash_criteria_size
+        
+        self.json_new_rule["exception"]["name"] = self.cash_exception_name
+        self.json_new_rule["exception"]["type"] = self.cash_exception_type
+        self.json_new_rule["exception"]["size"] = self.cash_exception_size
+        
     def func_create_top_level_and_ask_for_confirmation_to_save_the_rule(self):
+        self.update_dict_with_rule_in_creation()
+        
         top_level_window = ctk.CTkToplevel()
         top_level_window.geometry("1000x500")
         
@@ -139,7 +150,7 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
         top_level_window_label.place(x = 10, y = 10)
         
         top_level_window_label_show_rules_info = ctk.CTkLabel(master = top_level_window,
-                                                              text= f"Name of the rule: {self.entry_box_give_nikname.get() if self.entry_box_give_nikname.get() != "" else time.strftime("%Y-%m-%d %H:%M:%S")}\n\nTarget directory: {self.json_new_rule['target_directory']}\nAction: {self.json_new_rule['action']}\nWhere to move: {self.json_new_rule['where_to_move'] if self.json_new_rule['where_to_move'] != None else None}\nWhere to copy: {self.json_new_rule['where_to_copy'] if self.json_new_rule['where_to_copy'] != None else None}\nCriteria: {self.json_new_rule['criteria']}\nException: {self.json_new_rule['exception']}",
+                                                              text= f"Name of the rule: {self.entry_box_give_nikname.get() if self.entry_box_give_nikname.get() != "" else time.strftime("%Y-%m-%d %H:%M:%S")}\n\nTarget directory: {self.json_new_rule['target_directory']}\nAction: {self.json_new_rule['action']}\nWhere to move: {self.json_new_rule['where_to_move'] if self.json_new_rule['where_to_move'] != "None" else "None"}\nWhere to copy: {self.json_new_rule['where_to_copy'] if self.json_new_rule['where_to_copy'] != "None" else "None"}\nCriteria: {self.json_new_rule['criteria']}\nException: {self.json_new_rule['exception']}",
                                                                 font= ("Consolas", 18),
                                                                 wraplength= 980)
         top_level_window_label_show_rules_info.place(x = 200, y = 230)
@@ -170,6 +181,8 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
          
         self.reset_vars_and_widgets()
         self.display_rules()
+        Executor.running = False
+        self.start()
         
     
     def display_rules(self):
@@ -247,18 +260,18 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
         
         self.json_new_rule = {
                 "target_directory": self.current_directory,
-                "action": None,
-                "where_to_move": None,
-                "where_to_copy": None,
+                "action": "None",
+                "where_to_move": "None",
+                "where_to_copy": "None",
                 "criteria": {
-                    "name": None,
-                    "type": None,
-                    "size": None,
+                    "name": "None",
+                    "type": "None",
+                    "size": "None",
                 },
                 "exception": {
-                    "name": None,
-                    "type": None,
-                    "size": None,
+                    "name": "None",
+                    "type": "None",
+                    "size": "None",
             }
         }
         
@@ -298,7 +311,7 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
         self.option_menu_criteria.set("No criteria")
         
         self.label_show_crierias_selected = ctk.CTkLabel(master = self,
-                                                        text = f"Criterias selected:\nKey-word(s): {self.cash_criteria_name if self.cash_criteria_name != [] else None}\nType: {self.cash_criteria_type if self.cash_criteria_type != [] else None}\nSize: {self.cash_criteria_size if self.cash_criteria_size != {} else None}",
+                                                        text = f"Criterias selected:\nKey-word(s): {self.cash_criteria_name if self.cash_criteria_name != [] else "None"}\nType: {self.cash_criteria_type if self.cash_criteria_type != [] else "None"}\nSize: {self.cash_criteria_size if self.cash_criteria_size != {} else "None"}",
                                                         font = ("Consolas", 18))
         self.label_show_crierias_selected.place(x = 310, y = 380)   
         
@@ -365,7 +378,7 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
             self.option_menu_exception_size_measurment.set("Megabytes")
             
         self.label_show_exceptions_selected = ctk.CTkLabel(master = self,
-                                                    text = f"Exceptions selected:\nKey-word(s): {self.cash_exception_name if self.cash_exception_name != [] else None}\nType: {self.cash_exception_type if self.cash_exception_type != [] else None}\nSize: {self.cash_exception_size if self.cash_exception_size != {} else None}",
+                                                    text = f"Exceptions selected:\nKey-word(s): {self.cash_exception_name if self.cash_exception_name != [] else "None"}\nType: {self.cash_exception_type if self.cash_exception_type != [] else "None"}\nSize: {self.cash_exception_size if self.cash_exception_size != {} else "None"}",
                                                     font = ("Consolas", 18))
         self.label_show_exceptions_selected.place(x = 310, y = 620)
             
@@ -406,7 +419,7 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
             self.update_label_show_exceptions_selected()
 
     def update_label_show_exceptions_selected(self):
-        self.label_show_exceptions_selected.configure(text= f"Exceptions selected:\nKey-word(s): {self.cash_exception_name if self.cash_exception_name != [] else None}\nType: {self.cash_exception_type if self.cash_exception_type != [] else None}\nSize: { self.json_new_rule["exception"]["size"]["above_or_below"] + " " + str(self.json_new_rule["exception"]["size"]["size"]) + " " + self.json_new_rule["exception"]["size"]["measure"] if self.json_new_rule["exception"]["size"] != None else None}")
+        self.label_show_exceptions_selected.configure(text= f"Exceptions selected:\nKey-word(s): {self.cash_exception_name if self.cash_exception_name != [] else "None"}\nType: {self.cash_exception_type if self.cash_exception_type != [] else "None"}\nSize: { self.json_new_rule["exception"]["size"]["above_or_below"] + " " + str(self.json_new_rule["exception"]["size"]["size"]) + " " + self.json_new_rule["exception"]["size"]["measure"] if self.json_new_rule["exception"]["size"] != "None" else "None"}")
         
     def func_criteria(self, choice):
         try:
@@ -475,7 +488,7 @@ class GUI_Rules_for_files_and_folders(ctk.CTk):
             
 
     def update_label_show_crierias_selected(self):
-        self.label_show_crierias_selected.configure(text= f"Criterias selected:\nKey-word(s): {self.cash_criteria_name if self.cash_criteria_name != [] else None}\nType: {self.cash_criteria_type if self.cash_criteria_type != [] else None}\nSize: { self.json_new_rule["criteria"]["size"]["above_or_below"] + " " + str(self.json_new_rule["criteria"]["size"]["size"]) + " " + self.json_new_rule["criteria"]["size"]["measure"] if self.json_new_rule["criteria"]["size"] != None else None}")
+        self.label_show_crierias_selected.configure(text= f"Criterias selected:\nKey-word(s): {self.cash_criteria_name if self.cash_criteria_name != [] else "None"}\nType: {self.cash_criteria_type if self.cash_criteria_type != [] else "None"}\nSize: { self.json_new_rule["criteria"]["size"]["above_or_below"] + " " + str(self.json_new_rule["criteria"]["size"]["size"]) + " " + self.json_new_rule["criteria"]["size"]["measure"] if self.json_new_rule["criteria"]["size"] != "None" else "None"}")
     
     def func_criterias_name_or_type_updated(self, event, choice): # add the widget to the try distroy 
         if choice == "Name":
@@ -636,7 +649,7 @@ class Executor():
         C_type = False
         
         #criteria name
-        if data["criteria"]["name"] != None:
+        if data["criteria"]["name"] != []:
             for name in data["criteria"]["name"]:
                 if name in file_name:
                     C_name = True
@@ -644,7 +657,7 @@ class Executor():
             C_name = True
         
         #criteria type
-        if data["criteria"]["type"] != None:
+        if data["criteria"]["type"] != []:
             for variants in ["dir", "folder", "directory"]:
                 if variants in data["criteria"]["type"]:
                     if os.path.isdir(file):
@@ -656,7 +669,7 @@ class Executor():
             C_type = True
         
         #criteria size
-        if data["criteria"]["size"] != None:
+        if data["criteria"]["size"] != {}:
             if data["criteria"]["size"]["above_or_below"] == "above":
                 if os.path.getsize(file) > data["criteria"]["size"]["size"]:
                     C_size = True
@@ -669,6 +682,7 @@ class Executor():
                     C_size = False
         else:
             C_size = True
+
         return True if C_name and C_type and C_size else False
     
     def check_exceptions(self, data, file):
@@ -678,42 +692,43 @@ class Executor():
         else:
             file_name, file_type = file, "folder"
         
-        E_size = False
-        E_name = False
-        E_type = False
+        E_size = True
+        E_name = True
+        E_type = True
         
-        if data["exception"]["name"] != None:
+        if data["exception"]["name"] != []:
             for name in data["exception"]["name"]:
                 if name in file_name:
-                    E_name = True
+                    E_name = False
         else:
             E_name = True
             
-        if data["exception"]["type"] != None:
+        if data["exception"]["type"] != []:
             for variants in ["dir", "folder", "directory"]:
                 if variants in data["exception"]["type"]:
                     if os.path.isdir(file):
-                        E_type = True
+                        E_type = False
             for typee in data["exception"]["type"]:
                 if typee in file_type:
-                    E_type = True
+                    E_type = False
         else:
             E_type = True
             
-        if data["exception"]["size"] != None:
+        if data["exception"]["size"] != {}:
             if data["exception"]["size"]["above_or_below"] == "above":
                 if os.path.getsize(file) > data["exception"]["size"]["size"]:
-                    E_size = True
-                else:
                     E_size = False
+                else:
+                    E_size = True
             elif data["exception"]["size"]["above_or_below"] == "below":
                 if os.path.getsize(file) < data["exception"]["size"]["size"]:
-                    E_size = True
-                else:
                     E_size = False
+                else:
+                    E_size = True
         else:
             E_size = True
-        return False if E_name and E_type and E_size else True
+        
+        return True if E_name and E_type and E_size else False
     
     def check_if_path_still_exists(self, path, rule_name):
         if os.path.exists(path):
